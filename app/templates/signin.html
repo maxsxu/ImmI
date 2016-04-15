@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in{% endblock %}
+{% block head %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='css/signup.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="jumbotron">
+        <h1>Data ImmI</h1>
+        <form name="signIn" class="form-signin" action="/signIn" method="post">
+
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input type="email" name="inputEmail" id="inputEmail" class="form-control" placeholder="Email address"
+                   required autofocus {% if not email %}for="inputError2"{% endif %}>
+
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" name="inputPassword" id="inputPassword" class="form-control" placeholder="Password"
+                   required {% if not password %}for="inputError2"{% endif %}>
+
+            <a href="#" id="btnSignIn" class="btn btn-lg btn-primary btn-block" type="button">Sign in</a>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+{% endblock %}
