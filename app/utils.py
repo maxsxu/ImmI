@@ -11,6 +11,7 @@ config = {
             "authorize_url": "https://note.youdao.com/oauth/authorize2",
             "access_token_url": "https://note.youdao.com/oauth/access2",
             "redirect_uri": "dev.maxthread.com",
+            "oauth_token": ""
         }
     }
 }
@@ -39,28 +40,34 @@ apis = {
     "get_user": {
         "url": config["oauth_credentials"]["youdao"]["host"] + "/yws/open/user/get.json",
         "params": {"client_id": config["oauth_credentials"]["youdao"]["client_id"],
-                   "oauth_token": ""},
+                   "oauth_token": config["oauth_credentials"]["youdao"]["oauth_token"]},
         "method": "GET"
     },
     "get_notebooks": {
         "url": config["oauth_credentials"]["youdao"]["host"] + "/yws/open/notebook/all.json",
         "params": {"client_id": config["oauth_credentials"]["youdao"]["client_id"],
-                   "oauth_token": ""},
+                   "oauth_token": config["oauth_credentials"]["youdao"]["oauth_token"]},
         "method": "POST"
     },
     "get_notes_path": {
         "url": config["oauth_credentials"]["youdao"]["host"] + "/yws/open/notebook/list.json",
         "params": {"client_id": config["oauth_credentials"]["youdao"]["client_id"],
-                   "oauth_token": ""},
+                   "oauth_token": config["oauth_credentials"]["youdao"]["oauth_token"]},
         "method": "POST",
         "data": {"notebook": ""}
     },
     "get_note": {
         "url": config["oauth_credentials"]["youdao"]["host"] + "/yws/open/note/get.json",
         "params": {"client_id": config["oauth_credentials"]["youdao"]["client_id"],
-                   "oauth_token": ""},
+                   "oauth_token": config["oauth_credentials"]["youdao"]["oauth_token"]},
         "method": "POST",
         "data": {"path": ""}
+    },
+    "get_image": {
+        "url": config["oauth_credentials"]["youdao"]["host"] + "/yws/open/resource/download/",
+        "params": {"client_id": config["oauth_credentials"]["youdao"]["client_id"],
+                   "oauth_token": config["oauth_credentials"]["youdao"]["oauth_token"]},
+        "method": "GET"
     }
 }
 

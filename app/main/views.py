@@ -1,16 +1,23 @@
-# coding=utf-8
-
-from flask import render_template, request, url_for, redirect, json, flash, make_response
-from flask.ext.login import login_user, logout_user, current_user
-
-from app.main import main
-from app.users.models import User
-from app.main.oauth import OAuthSignIn
+from flask import render_template, redirect, url_for, abort, flash, request, \
+    current_app, make_response, jsonify, session
+from flask.ext.login import login_required, current_user, login_user
+from flask.ext.sqlalchemy import get_debug_queries
+from . import main
+from .forms import EditProfileForm, PostForm, CommentForm
+from .. import db
+from ..models import User, Notebook, Note, NotebookGroup
+from ..decorators import admin_required, permission_required
+from oauth import OAuthSignIn
+from .. import YoudaoApi
+from bs4 import BeautifulSoup
 
 
 @main.before_request
 def before_request():
+    if current_user.is_authenticated and not YoudaoApi.setOauthToken():
+        abort(403)
     print request.host, request.headers["Host"]
+
 
 @main.route('/authorize/<service>')
 def oauth_authorize(service):
@@ -22,90 +29,81 @@ def oauth_authorize(service):
 def oauth_callback(service):
     oauth = OAuthSignIn.get_service(service)
     youdao_user = oauth.callback()
-    if youdao_user['id'] is None:
+
+    if youdao_user is None:
         flash('Authentication failed.')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
+
     user = User.query.filter_by(youdao_id=youdao_user['id']).first()
     if not user:
         user = User.query.get(current_user.id)
         user.update_with_json(youdao_user)
         user.update()
     login_user(user, True)
-    response = make_response(redirect(url_for('index')))
+    response = make_response(redirect(url_for('main.index')))
     response.set_cookie("oauth_token", user.oauth_token)
+    YoudaoApi.setOauthToken()
     return response
 
 
-@main.route('/')
-@main.route('/index')
+@main.route("/index")
+@main.route('/', methods=['GET', 'POST'])
 def index():
-    render_template(url_for('index'))
-    return render_template('index.html')
+    if current_user.is_authenticated:
+        notebookGroups = Notebook.getNotebookGroup()
+        notebooksLoaded = True and (len(notebookGroups) != 0)
+
+        return render_template('index.html',
+                               notebookGroups=notebookGroups, notebooksLoaded=notebooksLoaded)
+    else:
+        return render_template('index.html')
 
 
-@main.route('/showSignIn')
-def showSignIn():
-    return render_template('signin.html')
+@main.route("/start")
+@login_required
+def start():
+    notebooks = YoudaoApi.getNotebooks()
+    for nb in notebooks:
+        notebook = Notebook(nb)
+        Notebook.add(notebook)
+
+    return redirect(url_for('main.index'))
 
 
-@main.route('/showSignUp')
-def showSignUp():
-    return render_template('signup.html')
+@main.route("/notebook/<int:notebook_id>")
+@login_required
+def showNotebook(notebook_id):
+    notebook = Notebook.query.get(notebook_id)
+    notes = []
+    notePaths = YoudaoApi.getNotesPath(notebook.path)
+    for np in notePaths:
+        nt = YoudaoApi.getNote(np)
+        note = Note.query.filter_by(path=nt['path']).first()
+        if note:
+            notes.append(note)
+            continue
+
+        note = Note(nt)
+        note.notebook_id = notebook_id
+
+        # conten handling
+        content = note.content
+        soup = BeautifulSoup(content)
+        imags = soup.findAll('img', {'data-media-type':'image'})
+        for img in imags:
+            imgUrl = img["src"]
+            print(imgUrl)
+            imgName = YoudaoApi.getImage(imgUrl)
+            img["src"] = "images/"+imgName
+        note.content = str(soup)
+
+        Note.add(note)
+        notes.append(note)
+    return render_template("index.html", notebook=notebook, notes=notes, showNote=True)
 
 
-@main.route('/signOut')
-def signOut():
-    logout_user()
-    return redirect(url_for('index'))
-
-
-@main.route('/signIn', methods=['POST', 'GET'])
-def signIn():
-    try:
-        _email = request.form['inputEmail']
-        _password = request.form['inputPassword']
-
-        if _email and _password:
-            user = User.query.filter_by(email=_email).first()
-            if user:
-                if user.password == _password:
-                    login_user(user, True)
-                    return render_template('index.html')
-                else:
-                    return render_template('signin.html', password=False)
-            else:
-                return render_template('signin.html', email=False)
-    except Exception as e:
-        return json.dumps({'error': str(e)})
-    finally:
-        pass
-
-
-@main.route('/signUp', methods=['POST', 'GET'])
-def signUp():
-    try:
-        _name = request.form['inputName']
-        _email = request.form['inputEmail']
-        _password = request.form['inputPassword']
-
-        # validate the received values
-        if _name and _email and _password:
-            user = User.query.filter_by(email=_email).first()
-            if not user:
-                user = User(username=_name, email=_email, password=_password)
-                User.add(user)
-                login_user(user, True)
-                return render_template('index.html')
-            else:
-                return json.dumps({'error' : "user exist"})
-        else:
-            return json.dumps({'html': '<span>Enter the required fields</span>'})
-
-    except Exception as e:
-        return json.dumps({'error': str(e)})
-    finally:
-        pass
-
-
-if __name__ == '__main__':
-    pass
+@main.route("/download")
+@login_required
+def download():
+    notes = list(Note.query.all())
+    return jsonify({"notes": [note.toJSON() for note in notes]})

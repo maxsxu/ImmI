@@ -1,0 +1,35 @@
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    {% for notebookGroup in notebookGroups %}
+        {% set notebooks = notebookGroup.notebooks %}
+        {% set groupName = notebookGroup.groupName %}
+        {% if groupName == "" %}
+            {% set groupName = "UnamedNotebookGroup" %}
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="heading-{{ groupName }}">
+                <h4 class="panel-title">
+                    <a role="button" data-toggle="collapse" data-parent="#accordion"
+                       href="#collapse-{{ groupName }}"
+                       aria-expanded="true" aria-controls="collapse-{{ groupName }}">
+                        {{ groupName }}<span class="badge">{{ notebookGroup.notebookCount }}</span>
+                    </a>
+                </h4>
+            </div>
+            <div id="collapse-{{ groupName }}" class="panel-collapse collapse" role="tabpanel"
+                 aria-labelledby="heading-{{ groupName }}">
+                <div class="panel-body">
+                    <ul class="posts">
+                        {% for notebook in notebooks %}
+                            <li class="post">
+                                <a href="{{ url_for('main.showNotebook', notebook_id=notebook.id) }}">
+                                    {{ notebook.name }}<span class="badge">{{ notebook.notes_num }}</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}
+</div>

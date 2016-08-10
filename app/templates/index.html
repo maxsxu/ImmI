@@ -1,38 +1,84 @@
 {% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "_macros.html" as macros %}
 
-{% block head %}
+{% block title %}ImmI{% endblock %}
+{% block styles %}
     {{ super() }}
+    <style>
+        .glyphicon-refresh-animate {
+            -animation: spin .7s infinite linear;
+            -webkit-animation: spin2 .7s infinite linear;
+        }
+
+        @-webkit-keyframes spin2 {
+            from {
+                -webkit-transform: rotate(0deg);
+            }
+            to {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: scale(1) rotate(0deg);
+            }
+            to {
+                transform: scale(1) rotate(360deg);
+            }
+        }
+    </style>
 {% endblock %}
 
-{% block content %}
-    <div class="jumbotron">
-        <h1>Youdao Cloud Note Data Immigrant</h1>
-        <p class="lead"></p>
-        <p>
-            {% if current_user.is_authenticated %}
-                <a class="btn btn-lg btn-success" href="{{ url_for('oauth_authorize', service='youdao') }}"
-                   role="button">Start</a>
-            {% else %}
-                <a class="btn btn-lg btn-success" href="{{ url_for('showSignUp') }}" role="button">Start</a>
-            {% endif %}
-        </p>
-        {% for message in get_flashed_messages() %}
-            <p><b>Error</b>: {{ message }}</p>
-        {% endfor %}
-    </div>
-
-    <div class="row marketing">
-        <div class="col-lg-6">
-            <h4>User 1001</h4>
-            <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>
-
-            <h4>User 1002</h4>
-            <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet
-                fermentum.</p>
-
-            <h4>User 1003</h4>
-            <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>
+{% block page_content %}
+    {% if not showNote %}
+        <div class="page-header">
+            <div class="jumbotron">
+                <h1>Youdao Cloud Note Data Immigrant</h1>
+                <p class="lead"></p>
+                <p>
+                    {% if current_user.is_authenticated and not current_user.youdao_id %}
+                        <a class="btn btn-lg btn-primary" href="{{ url_for('main.oauth_authorize', service='youdao') }}"
+                           role="button">Connect</a>
+                    {% elif current_user.is_authenticated and current_user.youdao_id %}
+                        <a id="btn-start" class="btn btn-lg btn-success" href="{{ url_for('main.start') }}"
+                           role="button">Start
+                        </a>
+                    {% else %}
+                        <a class="btn btn-lg btn-primary" href="{{ url_for('auth.signin') }}" role="button">Sign In</a>
+                    {% endif %}
+                </p>
+            </div>
         </div>
+    {% endif %}
+    <div class="post-tabs">
+        {% if showNote %}
+            {% include '_notes.html' %}
+        {% else %}
+            {% include '_notebooks.html' %}
+        {% endif %}
     </div>
+    {% if pagination %}
+        <div class="pagination">
+            {{ macros.pagination_widget(pagination, '.index') }}
+        </div>
+    {% endif %}
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+
+    <script>
+        {% if notebooksLoaded %}
+            $("#btn-start").removeClass("btn-warning").addClass("btn-success").html("Download")
+                    .attr("href", "{{ url_for('main.download') }}");
+        {% endif %}
+        $("#btn-start").click(function () {
+            $(this).removeClass("btn-success")
+                    .addClass("btn-warning").addClass("disabled")
+                    .html('<span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span> Loading...');
+        });
+    </script>
+
+{% endblock %}

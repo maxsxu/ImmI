@@ -1,62 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    {% block head %}
-        <title>{% block title %}ImmI - Youdao Cloud Note Immigrant{% endblock %}</title>
+{% extends "bootstrap/base.html" %}
 
-        <link href="../static/css/bootstrap.min.css" rel="stylesheet">
-        <link href="../static/css/jumbotron-narrow.css" rel="stylesheet">
-    {% endblock %}
+{% block title %}ImmI{% endblock %}
 
-</head>
+{% block metas %}
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+{% endblock %}
 
-<body>
+{% block styles %}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/jumbotron-narrow.css') }}">
+{% endblock %}
 
-{% block body %}
-
-    <div class="container">
-        <div class="header">
-            <nav>
-                <ul class="nav nav-pills pull-right">
-                    {% block header %}
-                        <li role="presentation" class="active"><a href="/">Home</a></li>
-                        {% if current_user.is_authenticated %}
-                            <li role="presentation">
-                                <a href="#">{{ current_user.email }}</a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{{ url_for('signOut') }}">Sign out</a>
-                            </li>
-                        {% else %}
-                            <li role="presentation">
-                                <a href="{{ url_for('showSignIn') }}">Sign In</a>
-                            </li>
-                            <li role="presentation">
-                                <a href="{{ url_for('showSignUp') }}">Sign Up</a>
-                            </li>
-                        {% endif %}
-                    {% endblock %}
+{% block navbar %}
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">ImmI</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="{{ url_for('main.index') }}">Home</a></li>
                 </ul>
-            </nav>
-            <h3 class="text-muted">ImmI</h3>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                {{ current_user.email }} <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{{ url_for('auth.signout') }}">Sign Out</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.signin') }}">Sign In</a></li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-
-        {% block content %}
-        {% endblock %}
-
-        <footer class="footer">
-            <p>&copy; Life Ltd. 2016</p>
-        </footer>
-
     </div>
+{% endblock %}
 
+{% block content %}
+    <div class="container">
+        {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% block page_content %}{% endblock %}
+    </div>
 {% endblock %}
 
 {% block scripts %}
-    <script src="../static/js/jquery-1.11.2.js"></script>
-    <script src="../static/js/bootstrap.min.js"></script>
-    <script src="../static/js/immi.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-1.11.2.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    {{ moment.include_moment() }}
 {% endblock %}
-
-</body>
-</html>

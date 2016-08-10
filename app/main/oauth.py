@@ -3,7 +3,7 @@
 from flask import url_for, request, redirect, session
 from rauth import OAuth2Service
 
-from app.api import Api
+from app import YoudaoApi
 from app.utils import config
 
 
@@ -26,7 +26,7 @@ class OAuthSignIn(object):
         pass
 
     def get_redirect_url(self):
-        return url_for('oauth_callback', service=self.service_name, _external=True)
+        return url_for('main.oauth_callback', service=self.service_name, _external=True)
 
     @classmethod
     def get_service(self, service_name):
@@ -62,26 +62,12 @@ class YoudaoSignIn(OAuthSignIn):
             return None
 
         code = request.args['code']
-        access_token = Api.accessToken(code)
         session["code"] = code
-        session["oauth_token"] = access_token
-
-        # oauth_session = self.service.get_auth_session(
-        #     method='GET',
-        #     data={
-        #         'client_id': self.client_id,
-        #         'client_secret': self.client_secret,
-        #         'code': code,
-        #         'grant_type': 'authorization_code',
-        #         'redirect_uri': self.get_redirect_url()
-        #     }
-        # )
-        #
-        # access_token = oauth_session.access_token
-        # me = oauth_session.get('').json()
+        access_token = YoudaoApi.accessToken(code)
 
         if access_token:
-            user = Api.getUser(access_token)
+            session["oauth_token"] = access_token
+            user = YoudaoApi.getUser()
             user['oauth_token'] = access_token
             return user
         else:

@@ -9,14 +9,14 @@ class Config:
     SSL_DISABLE = False
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_RECORD_QUERIES = True
-    MAIL_SERVER = 'smtp.googlemail.com'
-    MAIL_PORT = 587
+    MAIL_SERVER = 'pop.exmail.qq.com'
+    MAIL_PORT = 995
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
-    FLASKY_MAIL_SENDER = 'Flasky Admin <admin@immi.com>'
-    FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
+    MAIL_USERNAME = "xuhuan@bukeu.com"
+    MAIL_PASSWORD = "1122aabbccdd"
+    FLASKY_MAIL_SUBJECT_PREFIX = '[ImmI]'
+    FLASKY_MAIL_SENDER = 'ImmI Admin <xuhuan@bukeu.com>'
+    FLASKY_ADMIN = "admin"
     FLASKY_POSTS_PER_PAGE = 20
     FLASKY_FOLLOWERS_PER_PAGE = 50
     FLASKY_COMMENTS_PER_PAGE = 30
@@ -61,6 +61,3 @@ config = {
 
     'default': DevelopmentConfig
 }
-
-if __name__ == '__main__':
-    pass

@@ -1,0 +1,27 @@
+{% set notebookID = notebook.id %}
+<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="heading-{{ notebookID }}">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion"
+                   href="#collapse-{{ notebookID }}"
+                   aria-expanded="true" aria-controls="collapse-{{ notebookID }}">
+                    {{ notebook.name }}<span class="badge">{{ notebook.notes_num }}</span>
+                </a>
+            </h4>
+        </div>
+        <div id="collapse-{{ notebookID }}" class="panel-collapse collapse in" role="tabpanel"
+             aria-labelledby="heading-{{ notebookID }}">
+            <div class="panel-body">
+                <ul class="posts">
+                    {% for note in notes %}
+                        <li class="post">
+                            {{ note.title }}({{ note.size }}Byte)
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
