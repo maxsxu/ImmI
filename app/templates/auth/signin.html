@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}ImmI{% endblock %}
+
+{% block page_content %}
+    <div class="jumbotron">
+        <div class="page-header">
+            <h1>Sign In</h1>
+        </div>
+        <form name="signIn" class="form-signin" method="post">
+            {{ form.hidden_tag() }}
+            {{ form.email.label(class="sr-only") }}
+            {{ form.email(class="form-control", placeholder="Email", type="email") }}
+            {{ form.password.label(class="sr-only") }}
+            {{ form.password(class="form-control", placeholder="Password") }}
+            {{ form.remember_me }}{{ form.remember_me.label }}
+            {{ form.submit(id="btnSignIn", class="btn btn-lg btn-primary btn-block") }}
+        </form>
+        <br>
+        <p>New user? <a href="{{ url_for('auth.signup') }}">Click here to registe</a>.</p>
+    </div>
+{% endblock %}

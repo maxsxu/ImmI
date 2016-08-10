@@ -1,0 +1,37 @@
+<ul class="posts">
+    {% for notebook in notebooks %}
+        <li class="post">
+            <div class="post-thumbnail">
+                <a href="#">
+                    <img class="img-rounded profile-thumbnail" src="#">
+                </a>
+            </div>
+            <div class="post-content">
+                <div class="post-date">{{ moment(notebook.create_time).fromNow() }}</div>
+                <div class="post-author">
+                    <span>User: {{ notebook.user_youdao_id }}</span>
+                </div>
+                <div class="post-body">
+                    Name: {{ notebook.name }} <br>
+                    Path: {{ notebook.path }} <br>
+                    Group: {{ notebook.group }} <br>
+                    CreateTIme: {{ moment(notebook.create_time).fromNow() }} <br>
+                    ModifyTime: {{ moment(notebook.modify_time).fromNow() }} <br>
+                    {% if notebook.body_html %}
+                        {{ notebook.body_html | safe }}
+                    {% else %}
+                        {{ notebook.body }}
+                    {% endif %}
+                </div>
+                <div class="post-footer">
+                    <a href="#">
+                        <span class="label label-default">Permalink</span>
+                    </a>
+                    <a href="#">
+                        <span class="label label-primary">{{ notebook.notes_num }} Comments</span>
+                    </a>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+</ul>
